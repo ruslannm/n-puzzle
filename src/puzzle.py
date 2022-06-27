@@ -11,9 +11,9 @@ def make_puzzle(s, solvable, iterations):
             poss.append(idx - 1)
         if idx % s < s - 1:
             poss.append(idx + 1)
-        if idx / s > 0 and idx - s >= 0:
+        if idx - s >= 0:
             poss.append(idx - s)
-        if idx / s < s - 1:
+        if idx + s < len(p):
             poss.append(idx + s)
         swi = random.choice(poss)
         p[idx] = p[swi]
@@ -32,45 +32,41 @@ def make_puzzle(s, solvable, iterations):
     return p
 
 
-def make_goal_snail(s: int):
-    ts = s * s
-    puzzle = [-1 for i in range(ts)]
-    cur = 1
-    x = 0
-    ix = 1
-    y = 0
-    iy = 0
-    while True:
-        puzzle[x + y * s] = cur
-        if cur == 0:
-            break
-        cur += 1
-        if x + ix == s or x + ix < 0 or (ix != 0 and puzzle[x + ix + y * s] != -1):
-            iy = ix
-            ix = 0
-        elif y + iy == s or y + iy < 0 or (iy != 0 and puzzle[x + (y + iy) * s] != -1):
-            ix = -iy
-            iy = 0
-        x += ix
-        y += iy
-        if cur == s * s:
-            cur = 0
-    return puzzle
+def make_goal_snail(size: int):
+    puzzle = [[0 for _ in range(size)] for _ in range(size)]
+    moves = ((0, 1), (1, 0), (0, -1), (-1, 0))
+    total_size = size * size
+    i = 1
+    row = 0
+    col = 0
+    size -= 1
+    while i < total_size and size > 0:
+        for move in moves:
+            for _ in range(size):
+                if i == total_size:
+                    break
+                puzzle[row][col] = i
+                row += move[0]
+                col += move[1]
+                i += 1
+        row += 1
+        col += 1
+        size -= 2
+    return [i for row in puzzle for i in row]
 
 
-def make_goal_empty_tile_last(size):
-    puzzle = []
-    for i in range(1, size * size):
-        puzzle.append(i)
+def make_goal_empty_last(size):
+    puzzle = [i for i in range(1, size * size)]
     puzzle.append(EMPTY_TILE)
     return puzzle
 
 
 def get_inversion_count(size, puzzle):
+    total_size = size * size
     inversion_count = 0
-    for i in range(size * size - 1):
-        for j in range(i + 1, size * size):
-            if puzzle[j] and puzzle[i] and puzzle[i] > puzzle[j]:
+    for i in range(total_size - 1):
+        for j in range(i + 1, total_size):
+            if puzzle[j] != EMPTY_TILE and puzzle[i] != EMPTY_TILE and puzzle[i] > puzzle[j]:
                 inversion_count += 1
     return inversion_count
 
@@ -79,9 +75,32 @@ def get_empty_tile_row(size, puzzle):
     return size - puzzle.index(EMPTY_TILE) // size
 
 
+def get_position(size, puzzle, number):
+    position = puzzle.index(number)
+    row = position // size
+    col = position - row * size
+    return row, col
+
+
+def move_empty_to_last(size, initial_puzzle):
+    p = list(initial_puzzle)
+    row, col = get_position(size, p, EMPTY_TILE)
+    idx = p.index(EMPTY_TILE)
+    while row < size - 1:
+        p[idx], p[idx + size] = p[idx + size],  EMPTY_TILE
+        row += 1
+        idx += size
+    while col < size - 1:
+        p[idx], p[idx + 1] = p[idx + 1],  EMPTY_TILE
+        col += 1
+        idx += 1
+    return tuple(p)
+
+
 def is_solvable(size, initial_puzzle, goal):
-    mapping = {key: value for key, value in zip(goal, make_goal_empty_tile_last(size))}
+    mapping = {key: value for key, value in zip(move_empty_to_last(size, goal), make_goal_empty_last(size))}
     puzzle = [mapping[i] for i in initial_puzzle]
+    pretty_print(0, size, puzzle)
     inversion_count = get_inversion_count(size, puzzle)
     if size & 1:
         return not (inversion_count & 1)
@@ -91,3 +110,14 @@ def is_solvable(size, initial_puzzle, goal):
             return not (inversion_count & 1)
         else:
             return inversion_count & 1
+
+
+def pretty_print(offset, size, puzzle):
+    space = 4
+    for row in range(size):
+        if size < 11:
+            print(" " * offset, "".join([f"{puzzle[col + row * size]:>3}" for col in range(size)]))
+        elif size < 33:
+            print(" " * offset, "".join([f"{puzzle[col + row * size]:>4}" for col in range(size)]))
+        else:
+            print(" " * offset, "".join([f"{puzzle[col + row * size]:>5}" for col in range(size)]))

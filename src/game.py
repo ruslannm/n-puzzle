@@ -1,12 +1,7 @@
-from node import Node
-from puzzle import EMPTY_TILE
+from src.puzzle import EMPTY_TILE, get_position
 from math import sqrt
-
-
-def get_node_min_f(opened):
-    nodes = [(puzzle, node) for puzzle, node in opened.items()]
-    nodes.sort(key=lambda x: x[1].f)
-    return nodes[0][0], nodes[0][1]
+from itertools import count
+from heapq import heappush, heappop
 
 
 class Game:
@@ -25,49 +20,32 @@ class Game:
         self._uniform_cost = uniform_cost
         self._greedy = greedy
 
-    def _recover_path(self, node):
-        path_to_goal = [node]
-        parent = node.predecessor
-        while parent is not None:
-            path_to_goal.append(parent)
-            parent = parent.predecessor
-        path_to_goal.reverse()
-        return path_to_goal
+    def _get_expand(self, puzzle, move):
 
-    def _get_position(self, puzzle, number):
-        position = puzzle.index(number)
-        row = position % self._size
-        col = position - row * self._size
-        return row, col
+        def swap_tile(i, j):
+            tmp = list(puzzle)
+            tmp[i], tmp[j] = tmp[j], tmp[i]
+            return tuple(tmp)
 
-    def _append_node(self, expand, node_predecessor, direction, zero_position, tile_position):
-        node = Node(node_predecessor.puzzle,
-                    last_move=direction,
-                    depth=node_predecessor.depth + self._cost,
-                    predecessor=node_predecessor)
-        node.puzzle[zero_position], node.puzzle[tile_position] = node.puzzle[tile_position], node.puzzle[zero_position]
-        expand.append((tuple(node.puzzle), node))
-
-    def _get_expand(self, node):
-        idx = node.puzzle.index(EMPTY_TILE)
-        last_move = node.last_move
+        idx = puzzle.index(EMPTY_TILE)
+        s = self._size
         expand = list()
-        if idx % self._size > 0 and last_move != "r":
-            self._append_node(expand, node, "l", idx, idx - 1)
-        if idx % self._size < self._size - 1 and last_move != "l":
-            self._append_node(expand, node, "r", idx, idx + 1)
-        if idx / self._size > 0 and idx - self._size >= 0 and last_move != "d":
-            self._append_node(expand, node, "u", idx, idx - self._size)
-        if idx / self._size < self._size - 1 and last_move != "u":
-            self._append_node(expand, node, "d", idx, idx + self._size)
+        if idx % s > 0 and move != "r":
+            expand.append((swap_tile(idx, idx - 1), "l"))
+        if idx % s < s - 1 and move != "l":
+            expand.append((swap_tile(idx, idx + 1), "r"))
+        if idx - s >= 0 and move != "d":
+            expand.append((swap_tile(idx, idx - s), "u"))
+        if idx + s < len(puzzle) and move != "u":
+            expand.append((swap_tile(idx, idx + s), "d"))
         return expand
 
     def _manhattan_distance(self, puzzle):
         answer = 0
         for i in puzzle:
             if i > 0:
-                row, col = self._get_position(self._goal, i)
-                current_row, current_col = self._get_position(puzzle, i)
+                row, col = get_position(self._size, self._goal, i)
+                current_row, current_col = get_position(self._size, puzzle, i)
                 answer += abs(col - current_col) + abs(row - current_row)
         return answer
 
@@ -82,51 +60,49 @@ class Game:
         answer = 0
         for i in puzzle:
             if i > 0:
-                row, col = self._get_position(self._goal, i)
-                current_row, current_col = self._get_position(puzzle, i)
+                row, col = get_position(self._size, self._goal, i)
+                current_row, current_col = get_position(self._size, puzzle, i)
                 answer += round(sqrt((col - current_col) ** 2 + (row - current_row) ** 2))
         return answer
 
-    def _g(self, depth):
-        return depth if self._uniform_cost else 0
+    def _g(self, value):
+        return value if self._uniform_cost else 0
 
     def _h(self, puzzle):
         return self._heuristic(puzzle) if self._greedy else 0
 
-    def solve_astar(self):
-        node = Node(self._initial_puzzle)
-        opened = {tuple(node.puzzle): node}
+    def solve_a_star(self):
+        counter = count()
+        queue = [(0, next(counter), tuple(self._initial_puzzle), 0, "", None)]
+        opened = set()
+        opened.add(tuple(self._initial_puzzle))
         closed = dict()
         success = False
         total_number_opened = 1
         max_number_opened = 1
         path_to_goal = []
-        while opened != dict() and not success:
-            print(f"total_number_opened={total_number_opened}, max_number_opened={max_number_opened}")
-            e_puzzle, e = get_node_min_f(opened)
-            print(f"total_number_opened={total_number_opened}, max_number_opened={max_number_opened}, f={e.f}")
-            if e_puzzle == self._goal:
-                path_to_goal = self._recover_path(e)
+        while queue and not success:
+            _, _, e, e_g, e_move, e_parent = heappop(queue)
+            if e == self._goal:
+                path_to_goal = [e]
+                while e_parent is not None:
+                    path_to_goal.append(e_parent)
+                    e_parent = closed.get(e_parent, None)
+                path_to_goal.reverse()
                 success = True
             else:
-                del opened[e_puzzle]
+                opened.remove(e)
                 max_number_opened -= 1
-                closed[e_puzzle] = e
-                for s_puzzle, s in self._get_expand(e):
-                    if s_puzzle not in opened and s_puzzle not in closed:
-                        opened[s_puzzle] = s
-                        s.g = self._g(e.depth) + self._cost
-                        s.f = s.g + self._h(s.puzzle)
+                closed[e] = e_parent
+                next_g = self._g(e_g) + self._g(self._cost)
+                for s, s_move in self._get_expand(e, e_move):
+                    if s not in opened and s not in closed:
+                        next_f = self._h(s)
+                        opened.add(s)
+                        heappush(queue, (next_g + next_f, next(counter), s, next_g, s_move, e))
                         total_number_opened += 1
                         max_number_opened += 1
                     else:
-                        if s.g > e.g + self._cost:
+                        if next_g > e_g + self._g(self._cost):
                             print("c")
-                            if s_puzzle in closed:
-                                del closed[s_puzzle]
-                                opened[s_puzzle] = s
-                                s.g = self._g(e.depth) + self._cost
-                                s.f = s.g + self._h(s.puzzle)
-                                total_number_opened += 1
-                                max_number_opened += 1
         return success, total_number_opened, max_number_opened, path_to_goal

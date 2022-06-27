@@ -1,5 +1,10 @@
 import re, argparse
+from src.puzzle import make_puzzle
+
 COMMENT = "#"
+SIZE = 3
+ITERATION = 1
+
 
 def clear(s):
     comment = s.find(COMMENT)
@@ -43,12 +48,13 @@ def read_file(file):
             exit(-1)
     return size, puzzle
 
+
 def get_input():
-    print("a")
     parser = argparse.ArgumentParser()
     group_input = parser.add_mutually_exclusive_group()
     group_input.add_argument("-f", "--file", metavar="file", help="Input file")
     group_input.add_argument("-g", "--generate", metavar="size", type=int, help="Generate a n-size puzzle")
+    parser.add_argument("-us", "--unsolvable", action="store_true", help="Generate an unsolvable puzzle")
     parser.add_argument("-i", "--iteration", metavar="number", type=int, help="Choose the number of scrambling moves")
     group_search = parser.add_mutually_exclusive_group()
     group_search.add_argument("-un", "--uniform", action="store_true", help="Enable uniform-cost search")
@@ -58,4 +64,21 @@ def get_input():
                         help="Heuristic function choice, (default: %(default)s)")
     parser.add_argument("-t", "--time", action="store_true", help="Print time")
     args = parser.parse_args()
-    print(args.time, args)
+    if args.file:
+        size, puzzle = read_file(args.file)
+        if size < SIZE:
+            print(f"Acceptable value for puzzle: size >= {SIZE}")
+            exit(-1)
+    else:
+        if args.generate and args.iteration:
+            if args.generate >= SIZE and args.iteration > ITERATION:
+                size = args.generate
+                puzzle = make_puzzle(size, True, args.iteration)
+            else:
+                print(f"Acceptable value for generate puzzle: size >= {SIZE}, iteration >= {ITERATION}")
+                exit(-1)
+    uniform = args.uniform
+    greedy = args.greedy
+    if not (uniform or greedy):
+        uniform, greedy = True, True
+    return size, puzzle, uniform, greedy, args.heuristic, args.time
