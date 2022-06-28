@@ -3,33 +3,34 @@ import random
 RANDOM_SEED = 21
 EMPTY_TILE = 0
 
-def make_puzzle(s, solvable, iterations):
-    def swap_empty(p):
-        idx = p.index(EMPTY_TILE)
-        poss = []
-        if idx % s > 0:
-            poss.append(idx - 1)
-        if idx % s < s - 1:
-            poss.append(idx + 1)
-        if idx - s >= 0:
-            poss.append(idx - s)
-        if idx + s < len(p):
-            poss.append(idx + s)
-        swi = random.choice(poss)
-        p[idx] = p[swi]
-        p[swi] = EMPTY_TILE
 
-    p = make_goal_snail(s)
+def get_possible_position(size, puzzle):
+    empty = puzzle.index(EMPTY_TILE)
+    poss = []
+    if empty % size > 0:
+        poss.append(empty - 1)
+    if empty % size < size - 1:
+        poss.append(empty + 1)
+    if empty - size >= 0:
+        poss.append(empty - size)
+    if empty + size < len(puzzle):
+        poss.append(empty + size)
+    return empty, poss
+
+
+def make_puzzle(size, solvable, iterations):
+    puzzle = make_goal_snail(size)
     random.seed(RANDOM_SEED)
     for i in range(iterations):
-        swap_empty(p)
-
+        empty, possible = get_possible_position(size, puzzle)
+        new_empty = random.choice(possible)
+        puzzle[empty], puzzle[new_empty] = puzzle[new_empty], EMPTY_TILE
     if not solvable:
-        if p[EMPTY_TILE] == EMPTY_TILE or p[1] == EMPTY_TILE:
-            p[-1], p[-2] = p[-2], p[-1]
+        if puzzle[0] == EMPTY_TILE or puzzle[1] == EMPTY_TILE:
+            puzzle[-1], puzzle[-2] = puzzle[-2], puzzle[-1]
         else:
-            p[EMPTY_TILE], p[1] = p[1], p[EMPTY_TILE]
-    return p
+            puzzle[0], puzzle[1] = puzzle[1], puzzle[0]
+    return puzzle
 
 
 def make_goal_snail(size: int):
@@ -37,8 +38,7 @@ def make_goal_snail(size: int):
     moves = ((0, 1), (1, 0), (0, -1), (-1, 0))
     total_size = size * size
     i = 1
-    row = 0
-    col = 0
+    row, col = 0, 0
     size -= 1
     while i < total_size and size > 0:
         for move in moves:
@@ -100,7 +100,6 @@ def move_empty_to_last(size, initial_puzzle):
 def is_solvable(size, initial_puzzle, goal):
     mapping = {key: value for key, value in zip(move_empty_to_last(size, goal), make_goal_empty_last(size))}
     puzzle = [mapping[i] for i in initial_puzzle]
-    pretty_print(0, size, puzzle)
     inversion_count = get_inversion_count(size, puzzle)
     if size & 1:
         return not (inversion_count & 1)
@@ -113,7 +112,6 @@ def is_solvable(size, initial_puzzle, goal):
 
 
 def pretty_print(offset, size, puzzle):
-    space = 4
     for row in range(size):
         if size < 11:
             print(" " * offset, "".join([f"{puzzle[col + row * size]:>3}" for col in range(size)]))

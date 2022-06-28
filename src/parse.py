@@ -49,6 +49,27 @@ def read_file(file):
     return size, puzzle
 
 
+def validate_args(args):
+    if args['file']:
+        size, puzzle = read_file(args['file'])
+        if size < SIZE:
+            print(f"Acceptable value for puzzle: size >= {SIZE}")
+            return None
+    else:
+        if args['generate'] and args['iteration']:
+            if args['generate'] >= SIZE and args['iteration'] > ITERATION:
+                size = args['generate']
+                puzzle = make_puzzle(size, True, args['iteration'])
+            else:
+                print(f"Acceptable value for generate puzzle: size >= {SIZE}, iteration >= {ITERATION}")
+                return None
+    uniform = args['uniform']
+    greedy = args['greedy']
+    if not (uniform or greedy):
+        uniform, greedy = True, True
+    return size, puzzle, uniform, greedy, args['heuristic'], args['time']
+
+
 def get_input():
     parser = argparse.ArgumentParser()
     group_input = parser.add_mutually_exclusive_group()
@@ -63,22 +84,4 @@ def get_input():
                         choices=["Manhattan_distance", "Euclidian_distance", "Hamming_distance"],
                         help="Heuristic function choice, (default: %(default)s)")
     parser.add_argument("-t", "--time", action="store_true", help="Print time")
-    args = parser.parse_args()
-    if args.file:
-        size, puzzle = read_file(args.file)
-        if size < SIZE:
-            print(f"Acceptable value for puzzle: size >= {SIZE}")
-            exit(-1)
-    else:
-        if args.generate and args.iteration:
-            if args.generate >= SIZE and args.iteration > ITERATION:
-                size = args.generate
-                puzzle = make_puzzle(size, True, args.iteration)
-            else:
-                print(f"Acceptable value for generate puzzle: size >= {SIZE}, iteration >= {ITERATION}")
-                exit(-1)
-    uniform = args.uniform
-    greedy = args.greedy
-    if not (uniform or greedy):
-        uniform, greedy = True, True
-    return size, puzzle, uniform, greedy, args.heuristic, args.time
+    return vars(parser.parse_args())

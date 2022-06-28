@@ -1,12 +1,16 @@
 from time import perf_counter
-from src.parse import get_input
+from src.parse import get_input, validate_args
 from src.puzzle import make_goal_snail, is_solvable, pretty_print
 from src.game import Game
 
 COST = 1
 
 if __name__ == "__main__":
-    size, initial_puzzle, uniform, greedy, heuristic, time = get_input()
+    args = get_input()
+    data = validate_args(args)
+    if not data:
+        exit(-1)
+    size, initial_puzzle, uniform, greedy, heuristic, time = data
     goal = tuple(make_goal_snail(size))
     puzzle_solvable = is_solvable(size, initial_puzzle, goal)
     print(f"This puzzle is {'solvable' if puzzle_solvable else 'unsolvable'}")

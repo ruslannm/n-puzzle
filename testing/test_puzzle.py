@@ -1,6 +1,13 @@
 import pytest
 from src.puzzle import *
 
+@pytest.mark.parametrize("size, puzzle, expected_result", [
+    (3, [1, 2, 3, 8, 0, 4, 7, 6, 5], (4, [3, 5, 1, 7])),
+    (3, [1, 2, 3, 4, 5, 6, 7, 8, 0], (8, [7, 5])),
+])
+
+def test_get_possible_position(size, puzzle, expected_result):
+    assert get_possible_position(size, puzzle) == expected_result
 
 @pytest.mark.parametrize("size, expected_result", [
     (3, [1, 2, 3, 8, 0, 4, 7, 6, 5]),

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Args for game:
+{% if session['size'] %}
+      size= {{ session['size'] }}.
+   {% else %}
+      You are not Register.
+   {% endif %}
+</h1>
+{% endblock %}
