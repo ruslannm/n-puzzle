@@ -1,9 +1,6 @@
 import re, argparse
 from src.puzzle import make_puzzle
-
-COMMENT = "#"
-SIZE = 3
-ITERATION = 1
+from config import COMMENT, SIZE, ITERATION, ERROR_MESSAGE_SIZE, ERROR_MESSAGE_ITERATION
 
 
 def clear(s):
@@ -39,30 +36,25 @@ def read_file(file):
                 raise ValueError()
     except:
         print("Error reading file")
-        exit(-1)
+        return 0, None
     for i in range(size * size):
         if i in puzzle:
             continue
         else:
             print("Error in set")
-            exit(-1)
+            return 0, None
     return size, puzzle
 
 
-def validate_args(args):
+def validate_args(args: dict):
     if args['file']:
         size, puzzle = read_file(args['file'])
         if size < SIZE:
-            print(f"Acceptable value for puzzle: size >= {SIZE}")
+            print(ERROR_MESSAGE_SIZE)
             return None
     else:
-        if args['generate'] and args['iteration']:
-            if args['generate'] >= SIZE and args['iteration'] > ITERATION:
-                size = args['generate']
-                puzzle = make_puzzle(size, True, args['iteration'])
-            else:
-                print(f"Acceptable value for generate puzzle: size >= {SIZE}, iteration >= {ITERATION}")
-                return None
+        size = args["size"]
+        puzzle = make_puzzle(size, args["unsolvable"], args['iteration'])
     uniform = args['uniform']
     greedy = args['greedy']
     if not (uniform or greedy):
@@ -70,13 +62,33 @@ def validate_args(args):
     return size, puzzle, uniform, greedy, args['heuristic'], args['time']
 
 
+def check_size(value):
+    if not value.isdigit():
+        raise argparse.ArgumentTypeError(ERROR_MESSAGE_SIZE)
+    value = int(value)
+    if value < SIZE:
+        raise argparse.ArgumentTypeError(ERROR_MESSAGE_SIZE)
+    return value
+
+
+def check_iteration(value):
+    if not value.isdigit():
+        raise argparse.ArgumentTypeError(ERROR_MESSAGE_ITERATION)
+    value = int(value)
+    if value < ITERATION:
+        raise argparse.ArgumentTypeError(ERROR_MESSAGE_ITERATION)
+    return value
+
+
 def get_input():
     parser = argparse.ArgumentParser()
     group_input = parser.add_mutually_exclusive_group()
     group_input.add_argument("-f", "--file", metavar="file", help="Input file")
-    group_input.add_argument("-g", "--generate", metavar="size", type=int, help="Generate a n-size puzzle")
+    group_input.add_argument("-s", "--size", metavar="size", type=check_size, default=SIZE,
+                             help="Generate a n-size puzzle")
     parser.add_argument("-us", "--unsolvable", action="store_true", help="Generate an unsolvable puzzle")
-    parser.add_argument("-i", "--iteration", metavar="number", type=int, help="Choose the number of scrambling moves")
+    parser.add_argument("-i", "--iteration", metavar="number", type=check_iteration, default=ITERATION,
+                        help="Choose the number of scrambling moves")
     group_search = parser.add_mutually_exclusive_group()
     group_search.add_argument("-un", "--uniform", action="store_true", help="Enable uniform-cost search")
     group_search.add_argument("-gr", "--greedy", action="store_true", help="Enable greedy search")

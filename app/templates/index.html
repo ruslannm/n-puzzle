@@ -5,14 +5,15 @@
     <form action="" method="post"  novalidate>
         {{ form.hidden_tag() }}
         <p>
-            {{ form.generate(size=5) }} {{ form.generate.label }}<br>
-            {% for error in form.generate.errors %}
+            {{ form.size(size=5) }} {{ form.size.label }}<br>
+            {% for error in form.size.errors %}
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
-        <p>{{ form.unsolvable(size=5) }} {{ form.unsolvable.label }}</p>
         <p>{{ form.iteration(size=5) }} {{ form.iteration.label }}</p>
-        <p>{{ form.method.label }} {{ form.method }}</p>
+        <p>{{ form.unsolvable }} {{ form.unsolvable.label }}</p>
+        <p>{{ form.uniform }} {{ form.uniform.label }}</p>
+        <p>{{ form.greedy }} {{ form.greedy.label }}</p>
         <p>{{ form.heuristic.label }} {{ form.heuristic }}</p>
         <p>{{ form.submit() }}</p>
     </form>

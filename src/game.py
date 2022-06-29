@@ -1,8 +1,8 @@
-from src.puzzle import EMPTY_TILE, get_position
+from src.puzzle import get_position
 from math import sqrt
 from itertools import count
 from heapq import heappush, heappop
-
+from config import EMPTY_TILE
 
 class Game:
     def __init__(self, size, initial_puzzle, goal, cost, heuristic="manhattan_distance", uniform_cost=True,

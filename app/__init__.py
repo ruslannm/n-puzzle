@@ -1,6 +1,6 @@
 from flask import Flask
 # from flask_bootstrap import Bootstrap
-from config import Config
+from config_web import Config
 
 # bootstrap = Bootstrap()
 

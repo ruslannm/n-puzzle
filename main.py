@@ -2,8 +2,8 @@ from time import perf_counter
 from src.parse import get_input, validate_args
 from src.puzzle import make_goal_snail, is_solvable, pretty_print
 from src.game import Game
+from config import COST
 
-COST = 1
 
 if __name__ == "__main__":
     args = get_input()
