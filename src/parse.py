@@ -1,6 +1,6 @@
 import re, argparse
 from src.puzzle import make_puzzle
-from config import COMMENT, SIZE, ITERATION, ERROR_MESSAGE_SIZE, ERROR_MESSAGE_ITERATION
+from config import COMMENT, SIZE, ITERATION, ERROR_MESSAGE_SIZE, ERROR_MESSAGE_ITERATION, HEURISTIC, HEURISTIC_DEFAULT
 
 
 def clear(s):
@@ -92,8 +92,8 @@ def get_input():
     group_search = parser.add_mutually_exclusive_group()
     group_search.add_argument("-un", "--uniform", action="store_true", help="Enable uniform-cost search")
     group_search.add_argument("-gr", "--greedy", action="store_true", help="Enable greedy search")
-    parser.add_argument("-hf", "--heuristic", default="Manhattan_distance",
-                        choices=["Manhattan_distance", "Euclidian_distance", "Hamming_distance"],
+    parser.add_argument("-hf", "--heuristic", default=HEURISTIC_DEFAULT,
+                        choices=HEURISTIC,
                         help="Heuristic function choice, (default: %(default)s)")
     parser.add_argument("-t", "--time", action="store_true", help="Print time")
     return vars(parser.parse_args())

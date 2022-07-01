@@ -10,11 +10,16 @@
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
-        <p>{{ form.iteration(size=5) }} {{ form.iteration.label }}</p>
+        <p>
+            {{ form.iteration(size=5) }} {{ form.iteration.label }}<br>
+            {% for error in form.iteration.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
         <p>{{ form.unsolvable }} {{ form.unsolvable.label }}</p>
         <p>{{ form.uniform }} {{ form.uniform.label }}</p>
         <p>{{ form.greedy }} {{ form.greedy.label }}</p>
         <p>{{ form.heuristic.label }} {{ form.heuristic }}</p>
-        <p>{{ form.submit() }}</p>
+        <p>{{ form.submit(class_="button") }}</p>
     </form>
 {% endblock %}

@@ -1,0 +1,30 @@
+.puzzle {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+td {
+    border: 1px solid black;
+}
+
+.cell {
+    padding: 5px;
+    background: whitesmoke;
+    width: 30px;
+    height: 30px;
+}
+
+.living-cell {
+    background: lightgreen;
+}
+
+.button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+}

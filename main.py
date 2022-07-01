@@ -2,7 +2,7 @@ from time import perf_counter
 from src.parse import get_input, validate_args
 from src.puzzle import make_goal_snail, is_solvable, pretty_print
 from src.game import Game
-from config import COST
+from config import COST, RESULT
 
 
 if __name__ == "__main__":
@@ -15,16 +15,17 @@ if __name__ == "__main__":
     puzzle_solvable = is_solvable(size, initial_puzzle, goal)
     print(f"This puzzle is {'solvable' if puzzle_solvable else 'unsolvable'}")
     pretty_print(0, size, initial_puzzle)
-    heuristic = "manhattan_distance"
+    # heuristic = "manhattan_distance"
     game = Game(size, initial_puzzle, goal, COST, heuristic, uniform, greedy)
     t_start = perf_counter()
     success, total_number_opened, max_number_opened, path_to_goal = game.solve_a_star()
     t_work = perf_counter() - t_start
-    print(f"Complexity in time: {total_number_opened}")
-    print(f"Complexity in size: {max_number_opened}")
-    print(f"Number of moves: {len(path_to_goal) - 1}")
+    print(f"{RESULT['success']}: {success}")
+    print(f"{RESULT['total_number_opened']}: {total_number_opened}")
+    print(f"{RESULT['max_number_opened']}: {max_number_opened}")
+    print(f"{RESULT['len(path_to_goal)']}: {len(path_to_goal) - 1}")
     if time:
-        print(f"Working time: {t_work:.3f} seconds")
+        print(f"{RESULT['t_work']}: {t_work:.3f} seconds")
     offset = 7
     for ind, puzzle in enumerate(path_to_goal):
         if ind > 0:

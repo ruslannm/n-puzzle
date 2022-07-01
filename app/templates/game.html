@@ -1,11 +1,63 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Args for game:
-{% if session['size'] %}
-      size= {{ session['size'] }}.
-   {% else %}
-      You are not Register.
-   {% endif %}
-</h1>
+    {% if session['size'] %}
+        <h1>Initial state:</h1>
+        <p>size= {{ session['size'] }}.</p>
+        <p>uniform= {{ session['uniform'] }}.</p>
+        <p>greedy= {{ session['greedy'] }}.</p>
+        <p>heuristic= {{ session['heuristic'] }}.</p>
+        <table class="puzzle">
+            {% for i in range(session['size']) %}
+            <tr>
+                {% for j in range(session['size']) %}
+                    {% if session['initial_puzzle'][i * session['size'] + j] %}
+                        <td class="cell living-cell"> {{ session['initial_puzzle'][i * session['size'] + j] }}</td>
+                    {% else %}
+                        <td class="cell"></td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+        <form action="" method="post" novalidate>
+            <p>{{ form.submit(class_="button") }}</p>
+        </form>
+        {% if solution %}
+            {% for name, value in solution[:-1] %}
+                {% if name == "Working time" %}
+                    <p> {{ name }}: {{ "%.2f"|format(value) }} seconds</p>
+                {% elif name == "Number of moves" %}
+                    {% if value > 0 %}
+                        <p> {{ name }}: {{ value }}</p>
+                    {% endif %}
+                {% else %}
+                    <p> {{ name }}: {{ value }}</p>
+                {% endif %}
+            {% endfor %}
+
+            {% if solution[-1] %}
+                {% for puzzle in solution[-1][1] %}
+                    <p>Step: {{ loop.index0 }}</p>
+                        <table class="puzzle">
+                            {% for i in range(session['size']) %}
+                            <tr>
+                                {% for j in range(session['size']) %}
+                                    {% if puzzle[i * session['size'] + j] %}
+                                        <td class="cell living-cell"> {{ puzzle[i * session['size'] + j] }}</td>
+                                    {% else %}
+                                        <td class="cell"></td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </table>
+
+                {% endfor %}
+            {% endif %}
+        {% endif %}
+    {% else %}
+        <p>Puzzle not found.</p>
+    {% endif %}
+
 {% endblock %}

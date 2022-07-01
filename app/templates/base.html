@@ -1,16 +1,20 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    {% if title %}
+    <meta charset="UTF-8">
     <title>{{ title }} - N-Puzzle</title>
-    {% else %}
-    <title>Welcome to N-Puzzle</title>
-    {% endif %}
+    {% block scripts %}
+        <link href="{{ url_for("static", filename="style.css") }}" rel="stylesheet" type="text/css"/>
+    {% endblock %}
 </head>
 <body>
 <div>
     N-Puzzle:
-    <a href="{{ url_for('index') }}">Home</a>
-    <a href="{{ url_for('game') }}">Start</a>
+    <ul>
+        {% for m in menu %}
+    <li><a href="{{m.url}}">{{m.name}}</a></li>
+    {% endfor %}
+    </ul>
 </div>
 <hr>
 {% with messages = get_flashed_messages() %}
