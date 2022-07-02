@@ -23,7 +23,7 @@ def read_file(file):
                 if len(line) == 0:
                     continue
                 if i == 0:
-                    if line[0] == " " or not line.isdigit():
+                    if line[0] == " " or not line.strip().isdigit():
                         raise ValueError()
                     size = int(line)
                 else:

@@ -1,7 +1,25 @@
 from itertools import count
 from heapq import heappush, heappop
 from config import EMPTY_TILE
-from src.heuristic import HEURISTIC
+from src.puzzle import get_position
+from math import sqrt
+
+
+def positions(size, puzzle):
+    d = {}
+    for i in puzzle:
+        if i > 0:
+            d[i] = get_position(size, puzzle, i)
+    return d
+
+
+def position_by_index(size):
+    d = {}
+    for i in range(size * size):
+        row = i // size
+        col = i % size
+        d[i] = (row, col)
+    return d
 
 
 class Game:
@@ -11,11 +29,16 @@ class Game:
         self._initial_puzzle = [i for i in initial_puzzle]
         self._goal = goal
         self._cost = cost
-        if heuristic not in HEURISTIC:
+        heuristic_dict = {"manhattan_distance": self._manhattan_distance,
+                          "euclidian_distance": self._euclidian_distance,
+                          "hamming_distance": self._hamming_distance}
+        if heuristic not in heuristic_dict:
             raise Exception("Unknown heuristic function")
-        self._heuristic = HEURISTIC.get(heuristic)
+        self._heuristic = heuristic_dict.get(heuristic)
         self._uniform_cost = uniform_cost
         self._greedy = greedy
+        self._goal_positions = positions(size, goal)
+        self._position_by_index = position_by_index(size)
 
     def _get_expand(self, puzzle, move):
 
@@ -37,12 +60,36 @@ class Game:
             expand.append((swap_tile(idx, idx + s), "d"))
         return expand
 
+    def _manhattan_distance(self, puzzle):
+        answer = 0
+        for i in puzzle:
+            if i > 0:
+                row, col = self._goal_positions[i]
+                current_row, current_col = self._position_by_index[puzzle.index(i)]
+                answer += abs(col - current_col) + abs(row - current_row)
+        return answer
+
+    def _hamming_distance(self, puzzle):
+        answer = 0
+        for i in puzzle:
+            if i > 0:
+                answer += 1 if puzzle.index(i) != self._goal.index(i) else 0
+        return answer
+
+    def _euclidian_distance(self, puzzle):
+        answer = 0
+        for i in puzzle:
+            if i > 0:
+                row, col = self._goal_positions[i]
+                current_row, current_col = self._position_by_index[puzzle.index(i)]
+                answer += sqrt((col - current_col) ** 2 + (row - current_row) ** 2)
+        return answer
 
     def _g(self, value):
         return value if self._uniform_cost else 0
 
     def _h(self, puzzle):
-        return self._heuristic(self._size, puzzle, self._goal) if self._greedy else 0
+        return self._heuristic(puzzle) if self._greedy else 0
 
     def solve_a_star(self):
         counter = count()
@@ -71,14 +118,11 @@ class Game:
                 next_g = self._g(e_g) + self._g(self._cost)
                 for s, s_move in self._get_expand(e, e_move):
                     if s not in opened and s not in closed:
-                        next_f = self._h(s)
+                        next_h = self._h(s)
                         opened.add(s)
-                        heappush(queue, (next_g + next_f, next(counter), s, next_g, s_move, e))
+                        heappush(queue, (next_g + next_h, next(counter), s, next_g, s_move, e))
                         total_number_opened += 1
                         cur_number_opened += 1
                         if cur_number_opened > max_number_opened:
                             max_number_opened = cur_number_opened
-                    else:
-                        if next_g > e_g + self._g(self._cost):
-                            print("c")
         return success, total_number_opened, max_number_opened, path_to_goal

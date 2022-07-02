@@ -13,7 +13,6 @@ if __name__ == "__main__":
     size, initial_puzzle, uniform, greedy, heuristic, time, unsolvable, iteration, file = data
     goal = tuple(make_goal_snail(size))
     puzzle_solvable = is_solvable(size, initial_puzzle, goal)
-    print(f"This puzzle is {'solvable' if puzzle_solvable else 'unsolvable'}")
     if file:
         print(f"Puzzle gets from {file}")
     else:

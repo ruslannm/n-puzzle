@@ -2,6 +2,7 @@ import pytest
 from src.game import *
 from config import COST
 
+EPSILON = 1e-3
 
 @pytest.fixture()
 def init_game():
@@ -39,3 +40,30 @@ def test_g(init_game, value, expected_result):
 def test_g_0(init_game, value, expected_result):
     init_game._uniform_cost = False
     assert init_game._g(value) == expected_result
+
+
+@pytest.mark.parametrize("puzzle, expected_result", [
+    ([1, 2, 3, 8, 0, 8, 7, 6, 5], 0),
+    ([2, 1, 3, 8, 0, 8, 7, 6, 5], 2),
+    ([2, 1, 3, 8, 5, 8, 7, 6, 0], 4),
+])
+def test_manhattan_distance(init_game, puzzle, expected_result):
+    assert init_game._manhattan_distance(puzzle) == expected_result
+
+
+@pytest.mark.parametrize("puzzle, expected_result", [
+    ([1, 2, 3, 8, 0, 8, 7, 6, 5], 0),
+    ([2, 1, 3, 8, 0, 8, 7, 6, 5], 2),
+    ([2, 1, 3, 8, 5, 8, 7, 6, 0], 3),
+])
+def test_hamming_distance(init_game, puzzle, expected_result):
+    assert init_game._hamming_distance(puzzle) == expected_result
+
+
+@pytest.mark.parametrize("puzzle, expected_result", [
+    ([1, 2, 3, 8, 0, 8, 7, 6, 5], 0),
+    ([2, 1, 3, 8, 0, 8, 7, 6, 5], 2),
+    ([2, 1, 3, 8, 5, 8, 7, 6, 0], 3.414),
+])
+def test_euclidian_distance(init_game, puzzle, expected_result):
+    assert abs(init_game._euclidian_distance(puzzle) - expected_result) < EPSILON

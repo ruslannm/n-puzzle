@@ -76,7 +76,7 @@ def get_empty_tile_row(size, puzzle):
 def get_position(size, puzzle, number):
     position = puzzle.index(number)
     row = position // size
-    col = position - row * size
+    col = position % size
     return row, col
 
 
@@ -106,7 +106,7 @@ def is_solvable(size, initial_puzzle, goal):
         if pos & 1:
             return not (inversion_count & 1)
         else:
-            return inversion_count & 1
+            return bool(inversion_count & 1)
 
 
 def pretty_print(offset, size, puzzle):
