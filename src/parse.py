@@ -19,9 +19,9 @@ def read_file(file):
             data = f.read()
             ds, i = data.split("\n"), 0
             for line in ds:
-                if line[0] == COMMENT:
-                    continue
                 line = clear(line)
+                if len(line) == 0:
+                    continue
                 if i == 0:
                     if line[0] == " " or not line.isdigit():
                         raise ValueError()

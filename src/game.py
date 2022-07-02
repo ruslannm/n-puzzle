@@ -1,8 +1,8 @@
-from src.puzzle import get_position
-from math import sqrt
 from itertools import count
 from heapq import heappush, heappop
 from config import EMPTY_TILE
+from src.heuristic import HEURISTIC
+
 
 class Game:
     def __init__(self, size, initial_puzzle, goal, cost, heuristic="manhattan_distance", uniform_cost=True,
@@ -11,12 +11,9 @@ class Game:
         self._initial_puzzle = [i for i in initial_puzzle]
         self._goal = goal
         self._cost = cost
-        heuristic_dict = {"manhattan_distance": self._manhattan_distance,
-                          "euclidian_distance": self._euclidian_distance,
-                          "hamming_distance": self._hamming_distance}
-        if heuristic not in heuristic_dict:
+        if heuristic not in HEURISTIC:
             raise Exception("Unknown heuristic function")
-        self._heuristic = heuristic_dict.get(heuristic)
+        self._heuristic = HEURISTIC.get(heuristic)
         self._uniform_cost = uniform_cost
         self._greedy = greedy
 
@@ -40,30 +37,6 @@ class Game:
             expand.append((swap_tile(idx, idx + s), "d"))
         return expand
 
-    def _manhattan_distance(self, puzzle):
-        answer = 0
-        for i in puzzle:
-            if i > 0:
-                row, col = get_position(self._size, self._goal, i)
-                current_row, current_col = get_position(self._size, puzzle, i)
-                answer += abs(col - current_col) + abs(row - current_row)
-        return answer
-
-    def _hamming_distance(self, puzzle):
-        answer = 0
-        for i in puzzle:
-            if i > 0:
-                answer += 1 if puzzle.index(i) != self._goal.index(i) else 0
-        return answer
-
-    def _euclidian_distance(self, puzzle):
-        answer = 0
-        for i in puzzle:
-            if i > 0:
-                row, col = get_position(self._size, self._goal, i)
-                current_row, current_col = get_position(self._size, puzzle, i)
-                answer += round(sqrt((col - current_col) ** 2 + (row - current_row) ** 2))
-        return answer
 
     def _g(self, value):
         return value if self._uniform_cost else 0
@@ -80,6 +53,7 @@ class Game:
         success = False
         total_number_opened = 1
         max_number_opened = 1
+        cur_number_opened = 1
         path_to_goal = []
         while queue and not success:
             _, _, e, e_g, e_move, e_parent = heappop(queue)
@@ -92,7 +66,7 @@ class Game:
                 success = True
             else:
                 opened.remove(e)
-                max_number_opened -= 1
+                cur_number_opened -= 1
                 closed[e] = e_parent
                 next_g = self._g(e_g) + self._g(self._cost)
                 for s, s_move in self._get_expand(e, e_move):
@@ -101,7 +75,9 @@ class Game:
                         opened.add(s)
                         heappush(queue, (next_g + next_f, next(counter), s, next_g, s_move, e))
                         total_number_opened += 1
-                        max_number_opened += 1
+                        cur_number_opened += 1
+                        if cur_number_opened > max_number_opened:
+                            max_number_opened = cur_number_opened
                     else:
                         if next_g > e_g + self._g(self._cost):
                             print("c")

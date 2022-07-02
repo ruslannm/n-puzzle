@@ -3,10 +3,16 @@
 {% block content %}
     {% if session['size'] %}
         <h1>Initial state:</h1>
-        <p>size= {{ session['size'] }}.</p>
-        <p>uniform= {{ session['uniform'] }}.</p>
-        <p>greedy= {{ session['greedy'] }}.</p>
-        <p>heuristic= {{ session['heuristic'] }}.</p>
+        <p>size = {{ session['size'] }}.</p>
+        {% if session['uniform'] and session['greedy'] %}
+            <p>A* = True</p>
+        {% else %}
+            <p>uniform = {{ session['uniform'] }}.</p>
+            <p>greedy = {{ session['greedy'] }}.</p>
+        {% endif %}
+        {% if session['greedy'] %}
+            <p>heuristic = {{ session['heuristic'] }}.</p>
+        {% endif %}
         <table class="puzzle">
             {% for i in range(session['size']) %}
             <tr>
@@ -37,21 +43,21 @@
             {% endfor %}
 
             {% if solution[-1] %}
-                {% for puzzle in solution[-1][1] %}
-                    <p>Step: {{ loop.index0 }}</p>
-                        <table class="puzzle">
-                            {% for i in range(session['size']) %}
-                            <tr>
-                                {% for j in range(session['size']) %}
-                                    {% if puzzle[i * session['size'] + j] %}
-                                        <td class="cell living-cell"> {{ puzzle[i * session['size'] + j] }}</td>
-                                    {% else %}
-                                        <td class="cell"></td>
-                                    {% endif %}
-                                {% endfor %}
-                            </tr>
+                {% for puzzle in solution[-1][1][1:] %}
+                    <p>Step: {{ loop.index }}</p>
+                    <table class="puzzle">
+                        {% for i in range(session['size']) %}
+                        <tr>
+                            {% for j in range(session['size']) %}
+                                {% if puzzle[i * session['size'] + j] %}
+                                    <td class="cell living-cell"> {{ puzzle[i * session['size'] + j] }}</td>
+                                {% else %}
+                                    <td class="cell"></td>
+                                {% endif %}
                             {% endfor %}
-                        </table>
+                        </tr>
+                        {% endfor %}
+                    </table>
 
                 {% endfor %}
             {% endif %}

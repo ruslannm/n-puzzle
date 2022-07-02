@@ -4,6 +4,7 @@
 <h1>Args for game:</h1>
     <form action="" method="post"  novalidate>
         {{ form.hidden_tag() }}
+        <h2>Generate puzzle</h2>
         <p>
             {{ form.size(size=5) }} {{ form.size.label }}<br>
             {% for error in form.size.errors %}
@@ -17,6 +18,7 @@
             {% endfor %}
         </p>
         <p>{{ form.unsolvable }} {{ form.unsolvable.label }}</p>
+        <h2>Methods</h2>
         <p>{{ form.uniform }} {{ form.uniform.label }}</p>
         <p>{{ form.greedy }} {{ form.greedy.label }}</p>
         <p>{{ form.heuristic.label }} {{ form.heuristic }}</p>
