@@ -1,10 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Args for game:</h1>
+    <form action="" method="post" enctype="multipart/form-data"  novalidate>
+        {{ file_form.hidden_tag() }}
+        {% if session["filename"] %}
+            <p>File {{ session["filename"] }} uploaded. Need to validate.</p>
+        {% endif %}
+        <h2>Upload puzzle</h2>
+        <p>{{ file_form.file }}</p>
+         <p>{{ file_form.upload(class_="button") }}</p>
+    </form>
     <form action="" method="post"  novalidate>
         {{ form.hidden_tag() }}
-        <h2>Generate puzzle</h2>
+        <h2>{{ form.generate }} {{ form.generate.label }}</h2>
         <p>
             {{ form.size(size=5) }} {{ form.size.label }}<br>
             {% for error in form.size.errors %}
@@ -18,10 +26,10 @@
             {% endfor %}
         </p>
         <p>{{ form.unsolvable }} {{ form.unsolvable.label }}</p>
-        <h2>Methods</h2>
+        <h2>Methods to solve</h2>
         <p>{{ form.uniform }} {{ form.uniform.label }}</p>
         <p>{{ form.greedy }} {{ form.greedy.label }}</p>
         <p>{{ form.heuristic.label }} {{ form.heuristic }}</p>
-        <p>{{ form.submit(class_="button") }}</p>
+        <p>{{ form.validate(class_="button") }}</p>
     </form>
 {% endblock %}

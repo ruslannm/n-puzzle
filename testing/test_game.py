@@ -34,23 +34,8 @@ def test_g(init_game, value, expected_result):
 
 
 @pytest.mark.parametrize("value, expected_result", [
-    (1, 1), (5, 5), (0, 0)
+    (1, 0), (5, 0), (0, 0)
 ])
 def test_g_0(init_game, value, expected_result):
     init_game._uniform_cost = False
     assert init_game._g(value) == expected_result
-
-
-@pytest.mark.parametrize("puzzle, expected_result", [
-    (1, 1), (5, 5), (0, 0)
-])
-def test_h(init_game, puzzle, expected_result):
-    assert init_game._h(puzzle) == expected_result
-
-@pytest.mark.parametrize("puzzle, expected_result", [
-    (1, 1), (5, 5), (0, 0)
-])
-def test_h_0(init_game, puzzle, expected_result):
-    init_game._greedy = False
-    assert init_game._h(puzzle) == expected_result
-

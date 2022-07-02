@@ -1,4 +1,4 @@
 .idea
 __pycache__
-testing/valid_files
+.DS_Store
 *.txt

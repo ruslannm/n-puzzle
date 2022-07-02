@@ -12,7 +12,7 @@ def manhattan_distance(size, puzzle, goal):
     return answer
 
 
-def hamming_distance(puzzle, goal):
+def hamming_distance(_, puzzle, goal):
     answer = 0
     for i in puzzle:
         if i > 0:

@@ -19,7 +19,7 @@ def test_manhattan_distance(size, puzzle, goal, expected_result):
     ([1, 2, 3, 4, 5, 6, 7, 8, 0], [2, 1, 3, 4, 0, 6, 7, 8, 5], 3),
 ])
 def test_hamming_distance(puzzle, goal, expected_result):
-    assert hamming_distance(puzzle, goal) == expected_result
+    assert hamming_distance(0, puzzle, goal) == expected_result
 
 
 @pytest.mark.parametrize("size, puzzle, goal, expected_result", [

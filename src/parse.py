@@ -47,8 +47,9 @@ def read_file(file):
 
 
 def validate_args(args: dict):
-    if args['file']:
-        size, puzzle = read_file(args['file'])
+    file = args.get("file", None)
+    if file:
+        size, puzzle = read_file(file)
         if size < SIZE:
             print(ERROR_MESSAGE_SIZE)
             return None
@@ -59,7 +60,7 @@ def validate_args(args: dict):
     greedy = args['greedy']
     if not (uniform or greedy):
         uniform, greedy = True, True
-    return size, puzzle, uniform, greedy, args['heuristic'], args['time']
+    return size, puzzle, uniform, greedy, args['heuristic'], args['time'], args["unsolvable"], args['iteration'], file
 
 
 def check_size(value):

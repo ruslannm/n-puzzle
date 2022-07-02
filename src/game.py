@@ -42,7 +42,7 @@ class Game:
         return value if self._uniform_cost else 0
 
     def _h(self, puzzle):
-        return self._heuristic(puzzle) if self._greedy else 0
+        return self._heuristic(self._size, puzzle, self._goal) if self._greedy else 0
 
     def solve_a_star(self):
         counter = count()

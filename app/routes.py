@@ -1,47 +1,60 @@
 from flask import render_template, flash, redirect, url_for, session, request
 from app import app
-from app.forms import GameForm, SolveForm
+from app.forms import GameForm, SolveForm, FileForm
 from src.parse import validate_args
 from src.puzzle import make_goal_snail, is_solvable
 from src.game import Game
 from time import perf_counter
 from config import COST, RESULT
+import os
+from werkzeug.utils import secure_filename
 
 FIELDS_INT = ["size", "iteration"]
 FIELDS_BOOL = ["unsolvable", "uniform", "greedy"]
 FIELDS_STR = ["heuristic"]
-SESSION_FIELDS = ['size', 'initial_puzzle', 'uniform', 'greedy', 'heuristic', 'time']
+SESSION_FIELDS = ['size', 'initial_puzzle', 'uniform', 'greedy', 'heuristic', 'time', "unsolvable", 'iteration', 'file']
 MENU = [{"name": "Start", "url": "index"},
         {"name": "Game", "url": "game"}]
 
 
 def get_input(d):
-    args = {}
-    for k, v in d.items():
-        if k in FIELDS_INT:
-            args[k] = int(v)
-        elif k in FIELDS_BOOL:
-            args[k] = True if v == "y" else False
-        elif k in FIELDS_STR:
-            args[k] = v
-    args['file'] = None
+    args = {k: int(v) for k, v in d.items() if k in FIELDS_INT}
+    for k in FIELDS_BOOL:
+        args[k] = True if d.get(k, None) == "y" else False
+    args['heuristic'] = d["heuristic"]
     args['time'] = True
-    for field in FIELDS_BOOL:
-        if field not in d:
-            args[field] = False
+    if d.get("generate", None) == "y":
+        args["file"] = None
+        session["file"] = None
+        session["filename"] = None
+    else:
+        args["file"] = session["file"]
     return args
 
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 def index():
+    file_form = FileForm()
+    if file_form.validate_on_submit() and file_form.upload.data:
+        f = file_form.file.data
+        filename = secure_filename(f.filename)
+        file = os.path.join(os.path.abspath(os.path.dirname(__file__)), app.config["UPLOAD_FOLDER"], filename)
+        f.save(file)
+        session["file"] = file
+        session["filename"] = filename
+        flash(f"{filename} uploaded", category='success')
+        return redirect(url_for('index'))
     form = GameForm()
-    if form.validate_on_submit():
+    if form.validate_on_submit() and form.validate.data:
         args = get_input(request.form.to_dict())
         data = validate_args(args)
         if not data:
-            flash("Can't parse arguments")
-            return render_template('index.html', title='New Game', form=form, menu=MENU)
+            if session["filename"]:
+                flash(f"Can't parse file {session['filename']}", category='error')
+            else:
+                flash("Can't parse arguments", category='error')
+            return render_template('index.html', title='New Game', file_form=file_form, form=form, menu=MENU)
         if 'size' in session:
             for field, value in zip(SESSION_FIELDS, data):
                 session[field] = value
@@ -51,7 +64,8 @@ def index():
                 session[field] = value
 
         return redirect(url_for('game'))
-    return render_template('index.html', title='New Game', form=form, menu=MENU)
+    session["upload"] = False
+    return render_template('index.html', title='New Game', file_form=file_form, form=form, menu=MENU)
 
 
 @app.route('/game', methods=['GET', 'POST'])

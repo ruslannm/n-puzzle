@@ -3,6 +3,11 @@
 {% block content %}
     {% if session['size'] %}
         <h1>Initial state:</h1>
+        {% if session['filename'] %}
+            <p>Puzzle gets from file {{ session['filename'] }}</p>
+        {% else %}
+            <p>Puzzle generate with {{ session['iteration'] }} iterations. {% if session['unsolvable'] %}And made unsolvable.{% endif %}</p>
+        {% endif %}
         <p>size = {{ session['size'] }}.</p>
         {% if session['uniform'] and session['greedy'] %}
             <p>A* = True</p>

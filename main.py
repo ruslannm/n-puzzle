@@ -10,12 +10,15 @@ if __name__ == "__main__":
     data = validate_args(args)
     if not data:
         exit(-1)
-    size, initial_puzzle, uniform, greedy, heuristic, time = data
+    size, initial_puzzle, uniform, greedy, heuristic, time, unsolvable, iteration, file = data
     goal = tuple(make_goal_snail(size))
     puzzle_solvable = is_solvable(size, initial_puzzle, goal)
     print(f"This puzzle is {'solvable' if puzzle_solvable else 'unsolvable'}")
+    if file:
+        print(f"Puzzle gets from {file}")
+    else:
+        print(f"Puzzle generate with {iteration} iterations.", "And made unsolvable" if unsolvable else "")
     pretty_print(0, size, initial_puzzle)
-    # heuristic = "manhattan_distance"
     game = Game(size, initial_puzzle, goal, COST, heuristic, uniform, greedy)
     t_start = perf_counter()
     success, total_number_opened, max_number_opened, path_to_goal = game.solve_a_star()
@@ -26,6 +29,7 @@ if __name__ == "__main__":
     print(f"{RESULT['len(path_to_goal)']}: {len(path_to_goal) - 1}")
     if time:
         print(f"{RESULT['t_work']}: {t_work:.3f} seconds")
+        print(f"{RESULT['puzzle_solvable']}: {puzzle_solvable}")
     offset = 7
     for ind, puzzle in enumerate(path_to_goal):
         if ind > 0:
