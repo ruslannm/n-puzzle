@@ -2,8 +2,7 @@ import random
 from config import RANDOM_SEED, EMPTY_TILE
 
 
-def get_possible_position(size, puzzle):
-    empty = puzzle.index(EMPTY_TILE)
+def get_possible_position(size, total_size, empty):
     poss = []
     if empty % size > 0:
         poss.append(empty - 1)
@@ -11,18 +10,20 @@ def get_possible_position(size, puzzle):
         poss.append(empty + 1)
     if empty - size >= 0:
         poss.append(empty - size)
-    if empty + size < len(puzzle):
+    if empty + size < total_size:
         poss.append(empty + size)
-    return empty, poss
+    return poss
 
 
 def make_puzzle(size, unsolvable, iterations):
+    total_size = size * size
     puzzle = make_goal_snail(size)
     random.seed(RANDOM_SEED)
     for i in range(iterations):
-        empty, possible = get_possible_position(size, puzzle)
-        new_empty = random.choice(possible)
-        puzzle[empty], puzzle[new_empty] = puzzle[new_empty], EMPTY_TILE
+        empty = puzzle.index(EMPTY_TILE)
+        possible = get_possible_position(size, total_size, empty)
+        next_empty = random.choice(possible)
+        puzzle[empty], puzzle[next_empty] = puzzle[next_empty], EMPTY_TILE
     if unsolvable:
         if puzzle[0] == EMPTY_TILE or puzzle[1] == EMPTY_TILE:
             puzzle[-1], puzzle[-2] = puzzle[-2], puzzle[-1]
