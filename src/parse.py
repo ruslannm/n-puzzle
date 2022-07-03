@@ -60,7 +60,8 @@ def validate_args(args: dict):
     greedy = args['greedy']
     if not (uniform or greedy):
         uniform, greedy = True, True
-    return size, puzzle, uniform, greedy, args['heuristic'], args['time'], args["unsolvable"], args['iteration'], file
+    return size, puzzle, uniform, greedy, args['heuristic'], args['time'], args["unsolvable"], args['iteration'], args[
+        'attempt'], file
 
 
 def check_size(value):
@@ -97,4 +98,5 @@ def get_input():
                         choices=HEURISTIC,
                         help="Heuristic function choice, (default: %(default)s)")
     parser.add_argument("-t", "--time", action="store_true", help="Print time")
+    parser.add_argument("-a", "--attempt", action="store_true", help="Attempt to solve unsolvable puzzle")
     return vars(parser.parse_args())

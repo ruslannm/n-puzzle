@@ -15,4 +15,4 @@ RESULT = {"success": "Success result",
           "len(path_to_goal)": "Number of moves",
           "path_to_goal": "Path to the final state",
           "t_work": "Working time",
-          "puzzle_solvable": "Possibility of a solution without searching"}
+          "puzzle_solvable": "Puzzle is solvable"}

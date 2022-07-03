@@ -10,9 +10,10 @@ import os
 from werkzeug.utils import secure_filename
 
 FIELDS_INT = ["size", "iteration"]
-FIELDS_BOOL = ["unsolvable", "uniform", "greedy"]
+FIELDS_BOOL = ["unsolvable", "uniform", "greedy", "attempt"]
 FIELDS_STR = ["heuristic"]
-SESSION_FIELDS = ['size', 'initial_puzzle', 'uniform', 'greedy', 'heuristic', 'time', "unsolvable", 'iteration', 'file']
+SESSION_FIELDS = ['size', 'initial_puzzle', 'uniform', 'greedy', 'heuristic', 'time', "unsolvable", 'iteration',
+                  'attempt', 'file']
 MENU = [{"name": "Start", "url": "index"},
         {"name": "Game", "url": "game"}]
 
@@ -75,15 +76,18 @@ def game():
         goal = tuple(make_goal_snail(session["size"]))
         session["goal"] = goal
         puzzle_solvable = is_solvable(session["size"], session["initial_puzzle"], goal)
-        game = Game(session["size"], session["initial_puzzle"], session["goal"], COST, session["heuristic"],
-                    session["uniform"], session["greedy"])
-        t_start = perf_counter()
-        success, total_number_opened, max_number_opened, path_to_goal = game.solve_a_star()
-        t_work = perf_counter() - t_start
-        solution = ((RESULT['success'], success), (RESULT["total_number_opened"], total_number_opened),
-                    (RESULT["max_number_opened"], max_number_opened),
-                    (RESULT["len(path_to_goal)"], len(path_to_goal) - 1),
-                    (RESULT["t_work"], t_work),
-                    (RESULT["puzzle_solvable"], puzzle_solvable), (RESULT["path_to_goal"], path_to_goal))
+        if not puzzle_solvable and not session["attempt"]:
+            solution = ((RESULT["puzzle_solvable"], puzzle_solvable), [])
+        else:
+            game = Game(session["size"], session["initial_puzzle"], session["goal"], COST, session["heuristic"],
+                        session["uniform"], session["greedy"])
+            t_start = perf_counter()
+            success, total_number_opened, max_number_opened, path_to_goal = game.solve_a_star()
+            t_work = perf_counter() - t_start
+            solution = ((RESULT['success'], success), (RESULT["total_number_opened"], total_number_opened),
+                        (RESULT["max_number_opened"], max_number_opened),
+                        (RESULT["len(path_to_goal)"], len(path_to_goal) - 1),
+                        (RESULT["t_work"], t_work),
+                        (RESULT["puzzle_solvable"], puzzle_solvable), (RESULT["path_to_goal"], path_to_goal))
         return render_template('game.html', title='Game', menu=MENU, form=form, solution=solution)
     return render_template('game.html', title='Game', menu=MENU, form=form, solution=None)
